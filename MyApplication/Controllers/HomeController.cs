@@ -50,12 +50,12 @@ namespace MyApplication.Controllers
             {
                 ViewBag.msg = ex.Message;
                 return View();
-            }            
+            }
         }
 
         public IActionResult Login()
         {
-            if(HttpContext.Session.GetInt32("LogueadoId") != null)
+            if (HttpContext.Session.GetInt32("LogueadoId") != null)
             {
                 return RedirectToAction("Index");
             }
@@ -86,7 +86,7 @@ namespace MyApplication.Controllers
 
         public IActionResult MiPerfil(Usuario u)
         {
-            if(HttpContext.Session.GetInt32("LogueadoId") == null)
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
             {
                 return RedirectToAction("Registro");
             }
@@ -95,7 +95,7 @@ namespace MyApplication.Controllers
                 Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
                 return View(usuario);
             }
-            
+
         }
 
         public IActionResult EditPerfil()
@@ -140,8 +140,9 @@ namespace MyApplication.Controllers
             Usuario usuario = s.GetUsuarioById(id);
             try
             {
-                if(aptitud == null) { throw new Exception("Introduce una aptitud."); }
+                if (aptitud == null) { throw new Exception("Introduce una aptitud."); }
                 aptitud = aptitud.ToLower();
+                s.AgregarAptitud(aptitud); //Agrega aptitudes a una lista de aptitudes general
                 bool ExisteAptitud = false;
                 foreach (Aptitud a in usuario.Aptitudes)
                 {
@@ -172,6 +173,124 @@ namespace MyApplication.Controllers
             Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
             usuario.Aptitudes.Remove(usuario.Aptitudes.FirstOrDefault(a => a.Id == id));
             return RedirectToAction("EditAptitud", usuario.Id);
+        }
+
+        public IActionResult CreateProyecto()
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                ViewBag.userId = HttpContext.Session.GetInt32("LogueadoId");
+                ViewBag.aptitudes = s.GetListAptitudes();
+                return View();
+            }
+
+        }
+        [HttpPost]
+        public IActionResult CreateProyecto(Proyecto p, string a1, string a2, string a3, int userId)
+        {
+            Usuario u = s.GetUsuarioById(userId);
+            HttpContext.Session.SetInt32("LogueadoId", u.Id);
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+
+                try
+                {
+                    foreach (Proyecto pro in s.GetListProyectos())
+                    {
+                        if (pro.Nombre.Equals(p.Nombre))
+                        {
+                            throw new Exception("Ya existe un proyecto con este nombre.");
+                        }
+                    }
+                    p.Autor = u.Nombre;
+                    p.Estado = "En progreso";
+                    if (a1 == "X" && a2 == "X" && a3 == "X")
+                    {
+                        throw new Exception("Escoja al menos una tecnología.");
+                    }
+                    else
+                    {
+                        if (a1 != "X") { p.Tecnologias.Add(new Aptitud(a1)); }
+                        if (a2 != "X" && a2 != a1) { p.Tecnologias.Add(new Aptitud(a2)); }
+                        if (a3 != "X" && a3 != a1 && a3 != a2) { p.Tecnologias.Add(new Aptitud(a3)); }
+                    }
+                    p.Validar();
+                    u.MisProyectos.Add(p);
+                    s.GetListProyectos().Add(p);
+                    ViewBag.msg = "El proyecto ha sido creado correctamente.";
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.msg = ex.Message;
+                }
+                ViewBag.userId = u.Id;
+                ViewBag.aptitudes = s.GetListAptitudes();
+                return View();
+            }
+        }
+
+        public IActionResult DetailsProyecto(Proyecto p)
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+                Proyecto proyecto = s.GetListProyectos().FirstOrDefault(pr => pr.Nombre == p.Nombre);
+                return View(proyecto);
+            }
+        }
+        public IActionResult DeleteProyecto(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.Remove(usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre));
+            s.GetListProyectos().Remove(s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+            return RedirectToAction("MiPerfil", usuario.Id);
+        }
+        public IActionResult PausarProyecto(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Estado = "En pausa";
+            s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Estado = "En pausa";
+            return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+        }
+        public IActionResult ActivarProyecto(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Estado = "En progreso";
+            s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Estado = "En progreso";
+            return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+        }
+        public IActionResult TerminarProyecto(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Estado = "Finalizado";
+            s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Estado = "Finalizado";
+            return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+        }
+        public IActionResult ProyectoPrivado(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Tipo = "Privado";
+            s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Tipo = "Privado";
+            return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+        }
+        public IActionResult ProyectoPublico(string nombre)
+        {
+            Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+            usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Tipo = "Público";
+            s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Tipo = "Público";
+            return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
