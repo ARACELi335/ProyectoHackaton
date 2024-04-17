@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ namespace Dominio
     {
         private List<Usuario> usuarios { get; set; } = new List<Usuario>();
         private List<Proyecto> proyectos { get; set; } = new List<Proyecto>();
+        private List<Aptitud> aptitudes { get; set; } = new List<Aptitud>();
 
         //Patrón Singleton
         private static Sistema instance = null;
@@ -26,6 +27,15 @@ namespace Dominio
         //Precarga de datos, No es una aplicación oficial, por lo tanto no contiene datos reales.
         private void Precarga()
         {
+            //Cargar aptitudes en el sistema
+            aptitudes.Add(new Aptitud("java"));
+            aptitudes.Add(new Aptitud("javascript"));
+            aptitudes.Add(new Aptitud("c#"));
+            aptitudes.Add(new Aptitud("css"));
+            aptitudes.Add(new Aptitud("sql"));
+            aptitudes.Add(new Aptitud("html"));
+            aptitudes.Add(new Aptitud("python"));
+            //Cargar usuarios en el sistema
             CreateUsuario(new Usuario("Erika", "Araceli1", "Junior"));
             GetUsuarioById(0).Aptitudes.Add(new Aptitud("java"));
             GetUsuarioById(0).Aptitudes.Add(new Aptitud("javascript"));
@@ -83,6 +93,47 @@ namespace Dominio
                 }
             }
             return null;
+        }
+
+        public void CreateProyecto(Proyecto p)
+        {
+            try
+            {
+                p.Validar();
+                
+                proyectos.Add(p);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public void AgregarAptitud(string aptitud)
+        {
+            bool existeAptitud = false;
+            foreach (Aptitud a in aptitudes)
+            {
+                if (a.Nombre.Equals(aptitud))
+                {
+                    existeAptitud = true;
+                    break;
+                }
+            }
+            if (!existeAptitud)
+            {
+                aptitudes.Add(new Aptitud(aptitud));
+            }
+        }
+
+        public List<Aptitud> GetListAptitudes()
+        {
+            return aptitudes;
+        }
+
+        public List<Proyecto> GetListProyectos()
+        {
+            return proyectos;
         }
     }
 }
