@@ -1,0 +1,78 @@
+﻿@using Dominio
+@model Dominio.Proyecto
+
+@{
+    ViewData["Title"] = "CreateProyecto";
+}
+
+<h1>CreateProyecto</h1>
+
+<h4>Proyecto</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreateProyecto">
+            <input type="hidden" name="userID" value="@ViewBag.userId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Descripcion" class="control-label"></label>
+                <textarea asp-for="Descripcion" class="control-label"></textarea>
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="a1" class="control-label"></label>
+                <select for="a1" name="a1" class="form-control">
+                    <option value="X">Seleccione una aptitud</option>
+                    @foreach(Aptitud a in ViewBag.aptitudes)
+                    {
+                        <option value="@a.Nombre">@a.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="a2" class="control-label"></label>
+                <select for="a2" name="a2" class="form-control">
+                    <option value="X">Seleccione una aptitud</option>
+                    @foreach (Aptitud a in ViewBag.aptitudes)
+                    {
+                        <option value="@a.Nombre">@a.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="a3" class="control-label"></label>
+                <select for="a3" name="a3" class="form-control">
+                    <option value="X">Seleccione una aptitud</option>
+                    @foreach (Aptitud a in ViewBag.aptitudes)
+                    {
+                        <option value="@a.Nombre">@a.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tipo" class="control-label"></label>
+                <select asp-for="Tipo" class="form-control">
+                    <option value="Publico">Público</option>
+                    <option value="Privado">Privado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <p>@ViewBag.msg</p>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
