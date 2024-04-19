@@ -1,0 +1,50 @@
+﻿@model Dominio.Usuario
+
+@{
+    ViewData["Title"] = "Notificaciones";
+}
+
+<h1>Notificaciones</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <p>Usuario</p>
+            </th>
+            <th>
+                <p>Proyecto</p>
+            </th>
+            <th>
+                <p>Tipo</p>
+            </th>
+            <th>
+                <p>Estado</p>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Notificaciones)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Autor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Proyecto.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tipo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Estado)
+                </td>
+                <td>
+                    @Html.ActionLink("Eliminar", "DeleteNotificacion", new { notiId = item.Id, usuarioId = Model.Id})
+                    @Html.ActionLink("Detalles", "DetailsProyecto", new { item.Proyecto.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
