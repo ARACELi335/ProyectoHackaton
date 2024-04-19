@@ -210,11 +210,11 @@ namespace MyApplication.Controllers
 
                 try
                 {
-                    foreach (Proyecto pro in s.GetListProyectos())
+                    foreach (Proyecto pro in u.MisProyectos)
                     {
                         if (pro.Nombre.Equals(p.Nombre))
                         {
-                            throw new Exception("Ya existe un proyecto con este nombre.");
+                            throw new Exception("Ya tienes un proyecto con este nombre.");
                         }
                     }
                     p.Autor = u.Nombre;
@@ -252,17 +252,19 @@ namespace MyApplication.Controllers
             }
             else
             {
+                ViewBag.msg = TempData["msg"];
                 Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
-                Proyecto proyecto = s.GetListProyectos().FirstOrDefault(pr => pr.Nombre == p.Nombre);
+                Proyecto proyecto = s.GetListProyectos().FirstOrDefault(pr => pr.Id == p.Id);
                 HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
+                ViewBag.usuarioLogueado = usuario.Nombre;
                 return View(proyecto);
             }
         }
-        public IActionResult DeleteProyecto(string nombre)
+        public IActionResult DeleteProyecto(int id)
         {
             Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
-            usuario.MisProyectos.Remove(usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre));
-            s.GetListProyectos().Remove(s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+            usuario.MisProyectos.Remove(usuario.MisProyectos.FirstOrDefault(p => p.Id == id));
+            s.GetListProyectos().Remove(s.GetListProyectos().FirstOrDefault(p => p.Id == id));
             return RedirectToAction("MiPerfil", usuario.Id);
         }
         public IActionResult PausarProyecto(string nombre)
@@ -311,7 +313,7 @@ namespace MyApplication.Controllers
             {
                 Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
                 ViewBag.usuario = usuario.Id;
-                Proyecto proyecto = usuario.MisProyectos.FirstOrDefault(p => p.Id == pro.Id);
+                Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == pro.Id);
                 return View(proyecto);
             }
         }
@@ -321,6 +323,7 @@ namespace MyApplication.Controllers
         {
             Usuario usuario = s.GetUsuarioById(idUsuario);
             HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
+
             Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == id);
             try
             {
@@ -344,6 +347,12 @@ namespace MyApplication.Controllers
                 else
                 {
                     throw new Exception("Ya existe un archivo con el mismo nombre en este proyecto");
+                }
+                if (usuario.Nombre != proyecto.Autor)
+                {
+                    usuario.Proyectos.Add(proyecto);
+                    Usuario u = s.GetListUsuarios().FirstOrDefault(us => us.Nombre == proyecto.Autor);
+                    u.Notificaciones.Add(new Notificacion(u.Id, usuario.Nombre, proyecto, "Archivo subido", "Por leer"));
                 }
                 
             }
@@ -376,6 +385,114 @@ namespace MyApplication.Controllers
                 HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
                 return View(archivo);
             }
+        }
+
+        public IActionResult PedirAyuda(int id)
+        {
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == id);
+            try
+            {
+                foreach (Aptitud a in proyecto.Tecnologias)
+                {
+                    foreach (Usuario u in s.GetListUsuarios())
+                    {
+                        if (u.Nombre != proyecto.Autor &&
+                           u.Notificaciones.FirstOrDefault(n => n.Proyecto.Equals(proyecto) && n.Tipo == "Ayuda") == null &&
+                           u.Aptitudes.FirstOrDefault(ap => ap.Nombre.Equals(a.Nombre)) != null)
+                        {
+                            u.Notificaciones.Add(new Notificacion(u.Id, proyecto.Autor, proyecto, "Ayuda", "Por leer"));
+                        }
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["msg"] = ex.Message;
+            }
+            TempData["msg"] = "La ayuda ha sido solicitada a otros usuarios.";
+            return RedirectToAction("DetailsProyecto", proyecto);
+        }
+        public IActionResult Notificaciones(Usuario u)
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+                return View(usuario);
+            }
+        }
+        public IActionResult DeleteNotificacion(int notiId, int usuarioId)
+        {
+            Usuario usuario = s.GetUsuarioById(usuarioId);
+            usuario.Notificaciones.Remove(usuario.Notificaciones.FirstOrDefault(n => n.Id == notiId));
+            return RedirectToAction("Notificaciones", usuario);
+        }
+
+        public IActionResult EditTecnologia(int id)
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                ViewBag.msg = TempData["msg"];
+                Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+                return View(usuario.MisProyectos.FirstOrDefault(p => p.Id == id));
+            }
+        }
+
+        [HttpPost]
+        public IActionResult EditTecnologia(int? id, string tecnologia)
+        {
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == id);
+            try
+            {
+                if (tecnologia == null) { throw new Exception("Introduce una tecnología."); }
+                tecnologia = tecnologia.ToLower();
+                s.AgregarAptitud(tecnologia); //Agrega aptitudes a una lista de aptitudes general
+                bool Existe = false;
+                foreach (Aptitud a in proyecto.Tecnologias)
+                {
+                    if (a.Nombre.Equals(tecnologia))
+                    {
+                        Existe = true;
+                    }
+                }
+                if (!Existe)
+                {
+                    proyecto.Tecnologias.Add(new Aptitud(tecnologia));
+                }
+                else
+                {
+                    ViewBag.msg = "Ya tienes esta tecnología en tu proyecto.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.msg = ex.Message;
+            }
+            return View(proyecto);
+
+        }
+
+        public IActionResult DeleteTecnologia(int id, int idProyecto)
+        {
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == idProyecto);
+            if(proyecto.Tecnologias.Count == 1)
+            {
+                TempData["msg"] = "Debes tener al menos una tecnología en tu proyecto";
+            }
+            else
+            {
+                proyecto.Tecnologias.Remove(proyecto.Tecnologias.FirstOrDefault(a => a.Id == id));
+            }
+            
+            return RedirectToAction("EditTecnologia", proyecto.Id);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
