@@ -58,7 +58,7 @@
             {
                 foreach (Proyecto p in Model.MisProyectos)
                 {
-                    <p>@p.Nombre | @p.Estado | @p.Tipo | @Html.ActionLink("Detalles", "DetailsProyecto", new { p.Nombre }) | @Html.ActionLink("Eliminar", "DeleteProyecto", new { p.Nombre })</p>
+                    <p>@p.Nombre | @p.Estado | @p.Tipo | @Html.ActionLink("Detalles", "DetailsProyecto", new { p.Id }) | @Html.ActionLink("Eliminar", "DeleteProyecto", new { p.Id })</p>
                 }
             }
 
