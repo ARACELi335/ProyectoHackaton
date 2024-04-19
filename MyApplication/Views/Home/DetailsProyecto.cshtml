@@ -1,45 +1,40 @@
-﻿@model Dominio.Proyecto
+@using Dominio
+@model Dominio.Proyecto
 
 @{
     ViewData["Title"] = "DetailsProyecto";
 }
 
 <h1>DetailsProyecto</h1>
-
 <div>
     <h4>Proyecto</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Nombre)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Nombre)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Tecnologias)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-            @if (Model.Estado == "En progreso")
+        <dd class="col-sm-10">
+            @foreach (Aptitud a in Model.Tecnologias)
             {
-                <p>@Html.ActionLink("Pausar", "PausarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
-            }
-            else if (Model.Estado == "En pausa")
-            {
-                <p>@Html.ActionLink("Activar", "ActivarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+                <p>@a.Nombre</p>
             }
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Descripcion)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Descripcion)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Tipo)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Tipo)
             @if (Model.Tipo == "Privado")
             {
@@ -50,8 +45,49 @@
                 <p>@Html.ActionLink("Cambiar proyecto a privado", "ProyectoPrivado", new { Model.Nombre })</p>
             }
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Estado)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Estado)
+            @if (Model.Estado == "En progreso")
+            {
+                <p>@Html.ActionLink("Pausar", "PausarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+            }
+            else if (Model.Estado == "En pausa")
+            {
+                <p>@Html.ActionLink("Activar", "ActivarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Archivos)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Archivos.Count() == 0)
+            {
+                <p>No hay archivos cargados para este proyecto</p>
+            }
+            else
+            {
+                foreach (Archivo a in Model.Archivos)
+                {
+                    <p>Nombre: @a.Nombre | Autor: @a.Autor | @Html.ActionLink("Detalles", "DetailsArchivo", new { a.Id }) | @if (Model.Estado == "En progreso")
+                        {
+                            <a>@Html.ActionLink("Eliminar", "DeleteArchivo", new { archivoId = a.Id, proyectoId = Model.Id })</a>
+                        }</p>
+                    
+                }
+            }
+            @if(Model.Estado == "En progreso")
+            {
+                <p>@Html.ActionLink("Subir archivos", "SubirArchivo", new { Model.Id }) </p>
+            }
+            
+        </dd>
     </dl>
 </div>
+
+
 <div>
     @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) 
     <a asp-action="Index">Back to List</a>
