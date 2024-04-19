@@ -1,0 +1,32 @@
+﻿@model Dominio.Archivo
+
+@{
+    ViewData["Title"] = "DetailsArchivo";
+}
+
+<h1>DetailsArchivo</h1>
+
+<div>
+    <h4>Archivo</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Nombre)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Nombre)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Autor)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Autor)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Contenido)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Contenido)
+        </dd>
+    </dl>
+</div>
