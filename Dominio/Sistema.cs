@@ -154,5 +154,9 @@ namespace Dominio
             return archivo;
         }
 
+        public List<Usuario> GetListUsuarios()
+        {
+            return usuarios;
+        }
     }
 }
