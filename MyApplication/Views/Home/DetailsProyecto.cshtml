@@ -5,11 +5,21 @@
     ViewData["Title"] = "DetailsProyecto";
 }
 
+
 <h1>DetailsProyecto</h1>
 <div>
     <h4>Proyecto</h4>
     <hr />
     <dl class="row">
+        @if (ViewBag.usuarioLogueado != Model.Autor)
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Autor)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Autor)
+            </dd>
+        }
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Nombre)
         </dt>
@@ -24,6 +34,7 @@
             {
                 <p>@a.Nombre</p>
             }
+            <p>@Html.ActionLink("Editar tecnologías", "EditTecnologia", new { Model.Id }) </p>
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Descripcion)
@@ -31,32 +42,38 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Descripcion)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Tipo)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Tipo)
-            @if (Model.Tipo == "Privado")
-            {
-                <p>@Html.ActionLink("Cambiar proyecto a público", "ProyectoPublico", new { Model.Nombre })</p>
-            }
-            else
-            {
-                <p>@Html.ActionLink("Cambiar proyecto a privado", "ProyectoPrivado", new { Model.Nombre })</p>
-            }
-        </dd>
+        @if (ViewBag.usuarioLogueado == Model.Autor)
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Tipo)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Tipo)
+                @if (Model.Tipo == "Privado")
+                {
+                    <p>@Html.ActionLink("Cambiar proyecto a público", "ProyectoPublico", new { Model.Nombre })</p>
+                }
+                else
+                {
+                    <p>@Html.ActionLink("Cambiar proyecto a privado", "ProyectoPrivado", new { Model.Nombre })</p>
+                }
+            </dd>
+        }
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Estado)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Estado)
-            @if (Model.Estado == "En progreso")
+            @if (ViewBag.usuarioLogueado == Model.Autor)
             {
-                <p>@Html.ActionLink("Pausar", "PausarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
-            }
-            else if (Model.Estado == "En pausa")
-            {
-                <p>@Html.ActionLink("Activar", "ActivarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+                @if (Model.Estado == "En progreso")
+                {
+                    <p>@Html.ActionLink("Pausar", "PausarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+                }
+                else if (Model.Estado == "En pausa")
+                {
+                    <p>@Html.ActionLink("Activar", "ActivarProyecto", new { Model.Nombre }) | @Html.ActionLink("Finalizar", "TerminarProyecto", new { Model.Nombre })</p>
+                }
             }
         </dd>
         <dt class="col-sm-2">
@@ -71,7 +88,8 @@
             {
                 foreach (Archivo a in Model.Archivos)
                 {
-                    <p>Nombre: @a.Nombre | Autor: @a.Autor | @Html.ActionLink("Detalles", "DetailsArchivo", new { a.Id }) | @if (Model.Estado == "En progreso")
+                    <p>
+                        Nombre: @a.Nombre | Autor: @a.Autor | @Html.ActionLink("Detalles", "DetailsArchivo", new { a.Id }) | @if (Model.Estado == "En progreso" && ViewBag.usuarioLogueado == Model.Autor)
                         {
                             <a>@Html.ActionLink("Eliminar", "DeleteArchivo", new { archivoId = a.Id, proyectoId = Model.Id })</a>
                         }</p>
@@ -87,8 +105,12 @@
     </dl>
 </div>
 
+@if (ViewBag.usuarioLogueado == Model.Autor)
+{
+    <div>
+        @Html.ActionLink("Pedir ayuda", "PedirAyuda", new { Model.Id })
+        <a asp-action="Index">Back to List</a>
+        <p>@ViewBag.msg</p>
+    </div>
+}
 
-<div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) 
-    <a asp-action="Index">Back to List</a>
-</div>
