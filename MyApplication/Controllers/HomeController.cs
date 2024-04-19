@@ -3,17 +3,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApplication.Models;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using System.Text;
+
 
 namespace MyApplication.Controllers
 {
     public class HomeController : Controller
     {
         Sistema s = Sistema.GetSistema();
+        private IWebHostEnvironment _environment;
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment environment)
         {
             _logger = logger;
+            _environment = environment;
         }
 
         public IActionResult Index()
@@ -247,6 +254,7 @@ namespace MyApplication.Controllers
             {
                 Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
                 Proyecto proyecto = s.GetListProyectos().FirstOrDefault(pr => pr.Nombre == p.Nombre);
+                HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
                 return View(proyecto);
             }
         }
@@ -291,6 +299,83 @@ namespace MyApplication.Controllers
             usuario.MisProyectos.FirstOrDefault(p => p.Nombre == nombre).Tipo = "Público";
             s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre).Tipo = "Público";
             return RedirectToAction("DetailsProyecto", s.GetListProyectos().FirstOrDefault(p => p.Nombre == nombre));
+        }
+
+        public IActionResult SubirArchivo(Proyecto pro)
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+                ViewBag.usuario = usuario.Id;
+                Proyecto proyecto = usuario.MisProyectos.FirstOrDefault(p => p.Id == pro.Id);
+                return View(proyecto);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SubirArchivo(int? id, string nombre, IFormFile archivo, int? idUsuario)
+        {
+            Usuario usuario = s.GetUsuarioById(idUsuario);
+            HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == id);
+            try
+            {
+                if (archivo == null) { throw new Exception("El archivo es obligatorio."); }
+                string contenido;
+                using (var reader = new StreamReader(archivo.OpenReadStream()))
+                {
+                    contenido = reader.ReadToEnd();
+                }
+                string extension = Path.GetExtension(archivo.FileName);
+                if(nombre == null)
+                {
+                    nombre = archivo.FileName;
+                }
+                if (proyecto.Archivos.FirstOrDefault(a => a.Nombre == nombre) == null)
+                {
+                    Archivo arch = new Archivo(nombre, contenido, usuario.Nombre, new Aptitud(extension));
+                    proyecto.Archivos.Add(arch);
+                    ViewBag.msg = "El archivo se ha subido correctamente";
+                }
+                else
+                {
+                    throw new Exception("Ya existe un archivo con el mismo nombre en este proyecto");
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                ViewBag.msg = ex.Message;
+            }
+            ViewBag.usuario = usuario.Id;
+            return View(proyecto);
+
+        }
+
+        public IActionResult DeleteArchivo(int archivoId, int proyectoId)
+        {
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(p => p.Id == proyectoId);
+            proyecto.Archivos.Remove(s.GetArchivoById(archivoId));
+            return RedirectToAction("DetailsProyecto", proyecto);
+        }
+
+        public IActionResult DetailsArchivo(Archivo a)
+        {
+            if (HttpContext.Session.GetInt32("LogueadoId") == null)
+            {
+                return RedirectToAction("Registro");
+            }
+            else
+            {
+                Usuario usuario = s.GetUsuarioById(HttpContext.Session.GetInt32("LogueadoId"));
+                Archivo archivo = s.GetArchivoById(a.Id);
+                HttpContext.Session.SetInt32("LogueadoId", usuario.Id);
+                return View(archivo);
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
