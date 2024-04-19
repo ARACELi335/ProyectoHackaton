@@ -42,6 +42,14 @@ namespace Dominio
             GetUsuarioById(0).Aptitudes.Add(new Aptitud("c#"));
             GetUsuarioById(0).Aptitudes.Add(new Aptitud("css"));
             GetUsuarioById(0).Aptitudes.Add(new Aptitud("html"));
+            //Cargar proyectos en el sistema
+            List<Aptitud> apt = new List<Aptitud>();
+            apt.Add(new Aptitud("javascript"));
+            apt.Add(new Aptitud("css"));
+            apt.Add(new Aptitud("html"));
+            Proyecto p = new Proyecto("Prueba", GetUsuarioById(0).Nombre, "En progreso", "Este proyecto es una prueba para practicar mis habilidades", apt, "Público");
+            GetUsuarioById(0).MisProyectos.Add(p);
+            proyectos.Add(p);
         }
 
         public void CreateUsuario(Usuario u)
@@ -135,5 +143,16 @@ namespace Dominio
         {
             return proyectos;
         }
+
+        public Archivo GetArchivoById(int id)
+        {
+            Archivo archivo = new Archivo();
+            foreach(Proyecto p in proyectos)
+            {
+                archivo = p.Archivos.FirstOrDefault(a => a.Id == id);
+            }
+            return archivo;
+        }
+
     }
 }
