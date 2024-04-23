@@ -105,12 +105,50 @@
     </dl>
 </div>
 
+@* CHAT DE CONSEJOS *@
+<div class="col-md-4">
+    <h4>Consejos</h4>
+    <div>
+        @if(Model.Consejos.Count > 0)
+        {
+            @foreach (Consejo c in Model.Consejos)
+            {
+                <div>
+                    <a>@c.Autor.Nombre</a>
+                    <p>@c.Mensaje</p>
+                </div>
+            }
+        }
+        else
+        {
+            <p>Ningún consejo ha sido enviado para este proyecto</p>
+        }
+
+    </div>
+    <form asp-action="EnviarConsejo">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" name="nameUser" value="@ViewBag.usuarioLogueado" />
+        <div class="d-none">
+            <label asp-for="Id" class="control-label"></label>
+            <input asp-for="Id" class="form-control" readonly />
+            <span asp-validation-for="Id" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="mensaje" class="control-label">Tecnología</label>
+            <input for="mensaje" name="mensaje" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Enviar" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
+
 @if (ViewBag.usuarioLogueado == Model.Autor)
 {
     <div>
         @Html.ActionLink("Pedir ayuda", "PedirAyuda", new { Model.Id })
         <a asp-action="Index">Back to List</a>
-        <p>@ViewBag.msg</p>
     </div>
 }
 
+<p>@ViewBag.msg</p>
