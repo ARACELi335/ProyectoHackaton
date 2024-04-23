@@ -352,7 +352,12 @@ namespace MyApplication.Controllers
                 {
                     usuario.Proyectos.Add(proyecto);
                     Usuario u = s.GetListUsuarios().FirstOrDefault(us => us.Nombre == proyecto.Autor);
+                    
                     u.Notificaciones.Add(new Notificacion(u.Id, usuario.Nombre, proyecto, "Archivo subido", "Por leer"));
+                    if (proyecto.Ayudantes.FirstOrDefault(c => c.Id == u.Id) == null)
+                    {
+                        proyecto.Ayudantes.Add(u);
+                    }
                 }
                 
             }
@@ -432,6 +437,14 @@ namespace MyApplication.Controllers
             return RedirectToAction("Notificaciones", usuario);
         }
 
+        public IActionResult LeerNotificacion(int notiId, int usuarioId)
+        {
+            Usuario usuario = s.GetUsuarioById(usuarioId);
+            usuario.Notificaciones.FirstOrDefault(n => n.Id == notiId).Estado = "Leída";
+            return RedirectToAction("Notificaciones", usuario);
+        }
+
+
         public IActionResult EditTecnologia(int id)
         {
             if (HttpContext.Session.GetInt32("LogueadoId") == null)
@@ -493,6 +506,39 @@ namespace MyApplication.Controllers
             }
             
             return RedirectToAction("EditTecnologia", proyecto.Id);
+        }
+        public IActionResult EnviarConsejo(Proyecto p, string mensaje, string nameUser)
+        {
+            Usuario userLog = s.GetListUsuarios().FirstOrDefault(u => u.Nombre == nameUser);
+            Proyecto proyecto = s.GetListProyectos().FirstOrDefault(pro => pro.Id == p.Id);
+            try
+            {
+                if(mensaje != null)
+                {
+                    proyecto.Consejos.Add(new Consejo(userLog, mensaje));
+                    if (userLog.Nombre != proyecto.Autor)
+                    {
+                        Usuario user = s.GetListUsuarios().FirstOrDefault(u => u.Nombre == proyecto.Autor);
+                        //Enviar notificacion al autor del proyecto
+                        user.Notificaciones.Add(new Notificacion(user.Id, userLog.Nombre, proyecto, "Consejo", "Por leer"));
+                        //Añadir usuario logueado como consejero del proyecto
+                        if(proyecto.Consejeros.FirstOrDefault(c => c.Id == userLog.Id) == null)
+                        {
+                            proyecto.Consejeros.Add(userLog);
+                        }
+                    }
+                }
+                else
+                {
+                    TempData["msg"] = "Escriba un consejo para enviar";
+                }
+                
+            }
+            catch(Exception ex){
+                TempData["msg"] = ex.Message;
+            }
+            HttpContext.Session.SetInt32("LogueadoId", userLog.Id);
+            return RedirectToAction("DetailsProyecto", proyecto);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
