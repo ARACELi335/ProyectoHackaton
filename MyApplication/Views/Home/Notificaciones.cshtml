@@ -1,4 +1,4 @@
-﻿@model Dominio.Usuario
+@model Dominio.Usuario
 
 @{
     ViewData["Title"] = "Notificaciones";
@@ -41,6 +41,7 @@
                     @Html.DisplayFor(modelItem => item.Estado)
                 </td>
                 <td>
+                    @Html.ActionLink("Marcar como leída", "LeerNotificacion", new { notiId = item.Id, usuarioId = Model.Id })
                     @Html.ActionLink("Eliminar", "DeleteNotificacion", new { notiId = item.Id, usuarioId = Model.Id})
                     @Html.ActionLink("Detalles", "DetailsProyecto", new { item.Proyecto.Id })
                 </td>
