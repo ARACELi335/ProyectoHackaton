@@ -1,15 +1,13 @@
-﻿@using Dominio
+@using Dominio
 @model Dominio.Proyecto
 
 @{
-    ViewData["Title"] = "SubirArchivo";
+    ViewData["Title"] = "Subir Archivo";
 }
 
 <h1>Subir Archivos</h1>
 
-<h4>Archivo</h4>
-<hr />
-<div class="row">
+<div class="row contenedor">
     <dl class="row">
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Archivos)
@@ -23,8 +21,7 @@
             {
                 foreach (Archivo a in Model.Archivos)
                 {
-                    <p>Nombre: @a.Nombre <br />Lenguaje: @a.Lenguaje.Nombre <br />Autor: @a.Autor</p>
-                    <p>Contenido del archivo: <br />@a.Contenido</p>
+                    <p>Nombre: @a.Nombre <br />Lenguaje: @a.Lenguaje.Nombre <br />Autor: @a.Autor</p>    
                 }
             }
         </dd>
@@ -34,29 +31,28 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" name="idUsuario" value="@ViewBag.usuario" />
             <div class="form-group">
-                <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" readonly />
+                <input asp-for="Id" class="form-control" hidden readonly />
                 <span asp-validation-for="Id" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label for="nombre" class="control-label">Nombre</label>
-                <input for="nombre" name="nombre" class="form-control" />
+                <input for="nombre" name="nombre" placeholder="Nombre" />
             </div>
             <div class=" form-group">
-                <label for="archivo" class="control-label">Archivo</label>
-                <input for="archivo" type="file" name="archivo" id="archivo">
+                <input for="archivo" type="file" name="archivo" placeholder="Archivo" id="archivo">
             </div>
             
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Subir archivo" class="btn btn-primary" />
             </div>
         </form>
     </div>
+
+    <div>
+        <p>@ViewBag.msg</p>
+    </div>
+
 </div>
 
-<div>
-    <p>@ViewBag.msg</p>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
