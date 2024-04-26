@@ -2,14 +2,12 @@
 @model Dominio.Usuario
 
 @{
-    ViewData["Title"] = "MiPerfil";
+    ViewData["Title"] = "Mi Perfil";
 }
 
-<h1>MiPerfil</h1>
+<h1>Mi Perfil</h1>
 
-<div>
-    <h4>Usuario</h4>
-    <hr />
+<div class="contenedor">
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Nombre)
@@ -64,8 +62,9 @@
 
         </dd>
     </dl>
+    <div>
+        @Html.ActionLink("Editar", "EditPerfil", new { /* id = Model.PrimaryKey */ }) |
+        @Html.ActionLink("Editar aptitudes", "EditAptitud", new { /* id = Model.PrimaryKey */ })
+    </div>
 </div>
-<div>
-    @Html.ActionLink("Editar", "EditPerfil", new { /* id = Model.PrimaryKey */ }) |
-    @Html.ActionLink("Editar aptitudes", "EditAptitud", new { /* id = Model.PrimaryKey */ }) 
-</div>
+
