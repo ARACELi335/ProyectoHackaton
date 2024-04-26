@@ -1,8 +1,30 @@
-﻿@{
+@using Dominio
+@model IEnumerable<Dominio.Proyecto>
+
+@{
     ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@foreach (var item in Model)
+{
+    if(item.Tipo != "Privado")
+    {
+        <div class="container-fluid contenedor row">
+            <h4 class="col-1">@Html.DisplayFor(modelItem => item.Nombre)</h4>
+            <p class="col-11"> @Html.DisplayFor(modelItem => item.Estado)</p>
+            <div>
+                <p>Tecnologías:</p>
+                <ul>
+                    @foreach (Aptitud a in item.Tecnologias)
+                    {
+                        <li>@a.Nombre</li>
+                    }
+                </ul>
+            </div>
+            <p>Descripción: <br />@item.Descripcion</p>
+            <p class="col-8">Este proyecto pertenece a @item.Autor</p>
+            <a class="nav-link">@Html.ActionLink("Detalles", "DetailsProyecto", new { item.Id })</a>
+        </div>
+    }
+    
+}
