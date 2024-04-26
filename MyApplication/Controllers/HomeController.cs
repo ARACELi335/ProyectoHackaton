@@ -23,7 +23,7 @@ namespace MyApplication.Controllers
             _environment = environment;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(IEnumerable<Proyecto> proyectos)
         {
             //Registrarse
             int? logueadoId = HttpContext.Session.GetInt32("LogueadoId");
@@ -31,7 +31,7 @@ namespace MyApplication.Controllers
             {
                 return RedirectToAction("Registro");
             }
-            return View();
+            return View(s.GetListProyectos());
         }
 
         public IActionResult Registro()
