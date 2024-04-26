@@ -1,47 +1,44 @@
-﻿@model Dominio.Usuario
-
+@model Dominio.Usuario
+<link rel="stylesheet" href="~/css/reglog.css"/>
 @{
-    ViewData["Title"] = "Registro";
+    ViewData["Title"] = "Registrarse";
 }
 
-<h1>Registrarse</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="container-fluid row">
+    <div class="col-6 align-content-center">
+            <img src="~/LogoProjeckBank.svg" alt="Logo Projeckt Bank"/>
+    </div>
+    <div class="col-6">
+        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Login" style="text-align:end;">Iniciar sesión</a>
         <form asp-action="Registro">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
+                <input asp-for="Nombre" placeholder="Nombre"/>
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <input asp-for="Password" type="password" placeholder="Contraseña"/>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Nivel" class="control-label"></label>
-                <select asp-for="Nivel" class="form-control">
-                    <option value="X">Seleccione...</option>
+                <select asp-for="Nivel">
+                    <option value="X">Seleccione nivel...</option>
                     <option value="Junior">Junior</option>
                     <option value="Semi Senior">Semi Senior</option>
                     <option value="Senior">Senior</option>
                 </select>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Registrarse" class="btn btn-primary" />
             </div>
         </form>
+
+        <p>@ViewBag.msg</p>
     </div>
-</div>
-
-<p>@ViewBag.msg</p>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+
